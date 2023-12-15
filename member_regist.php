@@ -1,4 +1,4 @@
-<?php require '../header.php'; ?>
+<?php require './header.php'; ?>
 
 <?php session_start();
 
@@ -17,7 +17,7 @@ unset($_SESSION['original']);
 
 <h1>会員情報登録フォーム</h1>
 
-<form action="confirm.php" method="post">
+<form action="member_confirm.php" method="post">
 <table>
 <tr>
   <td>氏名</td>
@@ -50,12 +50,16 @@ unset($_SESSION['original']);
 </tr>
 <tr>
   <td>性別</td>
-  <td><input type="radio" name="gender" value="male" <?php if (isset($original['gender']) && $original['gender'] == "male") echo 'checked'; ?>>男性
-      <input type="radio" name="gender" value="female" <?php if (isset($original['gender']) && $original['gender'] == "female") echo 'checked'; ?>>女性</td>
+  <td><input type="radio" name="gender" value="1" <?php if (isset($original['gender']) && $original['gender'] == "1") echo 'checked'; ?>>男性
+      <input type="radio" name="gender" value="2" <?php if (isset($original['gender']) && $original['gender'] == "2") echo 'checked'; ?>>女性</td>
 </tr>
 <tr>
   <td ></td>
   <td><?php echo isset($flash['gender']) ? $flash['gender'] : null ?></td>
+</tr>
+<tr>
+  <td ></td>
+  <td><?php echo isset($flash['genderNot']) ? $flash['genderNot'] : null ?></td>
 </tr>
 <tr>
   <td>住所</td>
@@ -117,6 +121,10 @@ unset($_SESSION['original']);
 </tr>
 <tr>
   <td ></td>
+  <td><?php echo isset($flash['pref_nameNot']) ? $flash['pref_nameNot'] : null ?></td>
+</tr>
+<tr>
+  <td ></td>
   <td>それ以降の住所<input type="text" name="address" value="<?php echo isset($original['address']) ? $original['address'] : null;?>"></td>
 </tr>
 <tr>
@@ -175,11 +183,19 @@ unset($_SESSION['original']);
   <td ></td>
   <td><?php echo isset($flash['emailCheck']) ? $flash['emailCheck'] : null ?></td>
 </tr>
+<tr>
+  <td ></td>
+  <td><?php echo isset($flash['emailDup']) ? $flash['emailDup'] : null ?></td>
+</tr>
 </table>
 
 <input type="submit" value="確認画面へ">
 </form>
+<br>
+<button type="button" onclick="location.href='top.php'">トップに戻る</button>
+
 </div>
 
 
-<?php require '../footer.php'; ?>
+
+<?php require './footer.php'; ?>

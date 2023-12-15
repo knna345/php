@@ -1,53 +1,64 @@
-<?php require '../header.php'; ?>
+<?php require './header.php'; ?>
 <?php
 session_start();
 
+//DB接続
+$pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'password');
+
 //表示したいエラーメッセージ
 
-//氏名（姓）
+//氏名（姓）----------
 if(empty($_POST['name_sei'])){
     $_SESSION['flash']['name_sei'] = '氏名（姓）は必須入力です';
 }
-if (strlen($_POST['name_sei']) > 20) {
+if (mb_strlen($_POST['name_sei'] , "UTF-8") > 20) {
     $_SESSION['flash']['name_seiLength'] = "氏名（姓）は２０文字以内で入力してください";
 }
-if (! empty($_POST['name_sei']) && ! preg_match("/[ぁ-ん]+|[ァ-ヴー]+|[一-龠]/u", $_POST['name_sei'])){
-    $_SESSION['flash']['name_seiCheck'] = "氏名（姓）は漢字ひらがなカタカナで入力してください" ;
-}
-$_SESSION['original']['name_sei'] = $_POST['name_sei'];  //入力があった場合、一旦セッションに保存
+//if (! empty($_POST['name_sei']) && ! preg_match("/[ぁ-ん]+|[ァ-ヴー]+|[一-龠]/u", $_POST['name_sei'])){
+   // $_SESSION['flash']['name_seiCheck'] = "氏名（姓）は漢字ひらがなカタカナで入力してください" ;
+//}
+$_SESSION['original']['name_sei'] = htmlspecialchars($_POST['name_sei']);  //入力があった場合、一旦セッションに保存
 
-//氏名（名）
+
+//氏名（名）----------
 if(empty($_POST['name_mei'])){
     $_SESSION['flash']['name_mei'] = '氏名（名）は必須入力です';
 }
-if (strlen($_POST['name_mei']) > 20) {
+if (mb_strlen($_POST['name_mei'] , "UTF-8") > 20) {
     $_SESSION['flash']['name_meiLength'] = "氏名（名）は２０文字以内で入力してください";
 }
-if (! empty($_POST['name_mei']) && ! preg_match("/[ぁ-ん]+|[ァ-ヴー]+|[一-龠]/u", $_POST['name_mei'])){
-    $_SESSION['flash']['name_meiCheck'] = "氏名（名）は漢字ひらがなカタカナで入力してください" ;
-}
-$_SESSION['original']['name_mei'] = $_POST['name_mei'];  //入力があった場合、一旦セッションに保存
+//if (! empty($_POST['name_mei']) && ! preg_match("/[ぁ-ん]+|[ァ-ヴー]+|[一-龠]/u", $_POST['name_mei'])){
+    //$_SESSION['flash']['name_meiCheck'] = "氏名（名）は漢字ひらがなカタカナで入力してください" ;
+//}
+$_SESSION['original']['name_mei'] = htmlspecialchars($_POST['name_mei']);  //入力があった場合、一旦セッションに保存
 
-//性別
+
+//性別----------
 if(empty($_POST['gender'])){
     $_SESSION['flash']['gender'] = '性別は必須入力です';
 }
+//開発ツールで男性・女性以外の値をvalue値に入れるとエラー　したのswitch文で実装
+//if (! $_POST['gender'] == 'male' || ! $_POST['gender'] == 'female'){
+   // $_SESSION['flash']['genderNot'] = "男性または女性を選択してください"
+//}
 $_SESSION['original']['gender'] = $_POST['gender'];  //入力があった場合、一旦セッションに保存
 
-//都道府県
+
+//都道府県----------
 if($_POST['pref_name'] == "0"){
     $_SESSION['flash']['pref_name'] = '住所（都道府県）は必須入力です';
 }
 $_SESSION['original']['pref_name'] = $_POST['pref_name'];  //入力があった場合、一旦セッションに保存
 
 
-//住所（それ以降の住所）
-if (strlen($_POST['address']) > 100) {
+//住所（それ以降の住所）----------
+if (mb_strlen($_POST['address'] , "UTF-8") > 100) {
     $_SESSION['flash']['addressLength'] = "住所（それ以降の住所）は１００文字以内で入力してください";
 }
-$_SESSION['original']['address'] = $_POST['address'];  //入力があった場合、一旦セッションに保存
+$_SESSION['original']['address'] = htmlspecialchars($_POST['address']);  //入力があった場合、一旦セッションに保存
 
-//パスワード
+
+//パスワード----------
 if(empty($_POST['password'])){
     $_SESSION['flash']['password'] = 'パスワードは必須入力です';
 }
@@ -59,7 +70,8 @@ if (! empty($_POST['password']) && ! preg_match('/^[a-zA-Z0-9]+$/', $_POST['pass
 }
 $_SESSION['original']['password'] = $_POST['password'];  //入力があった場合、一旦セッションに保存
 
-//パスワード確認
+
+//パスワード確認----------
 if(empty($_POST['passwordConfirm'])){
     $_SESSION['flash']['passwordConfirm'] = 'パスワード確認は必須入力です';
 }
@@ -74,7 +86,8 @@ if (! ($_POST['password'] === $_POST['passwordConfirm'])){
 }
 $_SESSION['original']['passwordConfirm'] = $_POST['passwordConfirm'];  //入力があった場合、一旦セッションに保存
 
-//メールアドレス
+
+//メールアドレス----------
 if(empty($_POST['email'])){
     $_SESSION['flash']['email'] = 'メールアドレスは必須入力です';
 }
@@ -84,7 +97,15 @@ if (strlen($_POST['email']) > 200) {
 if (! empty($_POST['email']) && ! preg_match('/^[a-z0-9._+^~-]+@[a-z0-9.-]+$/i', $_POST['email'])){
     $_SESSION['flash']['emailCheck'] = "メールアドレスを入力してください" ;
 }
-$_SESSION['original']['email'] = $_POST['email'];  //入力があった場合、一旦セッションに保存
+//メールがDBに既に登録があった場合エラーの表示
+$sql = $pdo -> prepare('select * from members where email=?');
+$sql -> execute([$_POST['email']]);
+if (! empty($sql -> fetchAll())){
+    $_SESSION['flash']['emailDup'] = "登録済みのメールアドレスは使用できません" ;
+}
+
+$_SESSION['original']['email'] = htmlspecialchars($_POST['email']);  //入力があった場合、一旦セッションに保存
+
 
 
 //空欄の時入力フォームに返す
@@ -92,18 +113,30 @@ $_SESSION['original']['email'] = $_POST['email'];  //入力があった場合、
   //  header('Location:http://localhost/html_lesson/PHP/member_regist.php');
 //}
 
-//エラーメッセージが出る場合フォームに返す
+//エラーメッセージが出る場合フォームに返す----------
 if(! empty($_SESSION['flash'])){
-    header('Location:http://localhost/html_lesson/PHP/member_regist.php');
+    header('Location:https://ik1-219-79869.vs.sakura.ne.jp/php/member_regist.php');
 }
 
+// 二重送信防止用トークンの発行
+$token = uniqid('', true);;
+
+//トークンをセッション変数にセット
+$_SESSION['token'] = $token;
+
+//表示用データ置き換え（性別・都道府県）
 switch ($_POST['gender']){
-    case 'male':
+    case '1':
         $gender = '男性';
+        $_SESSION['original']['genderName'] = $gender;
         break;
 
-    case 'female':
+    case '2':
         $gender = '女性';
+        $_SESSION['original']['genderName'] = $gender;
+        break;
+    default:
+        $_SESSION['flash']['genderNot'] = "選択肢の性別から選択してください";
         break;
 }
 
@@ -299,22 +332,29 @@ switch ($_POST['pref_name']){
     case '47':
     $pref = '沖縄県';
     break;
+
+    default:
+    $_SESSION['flash']['pref_nameNot'] = "選択肢の都道府県から選択してください";
+    break;
 }
+
+$_SESSION['original']['pref_nameName'] = $pref;
 
 ?>
 
 <h1>会員情報確認画面</h1>
-<p>氏名　　　　　　<?php echo $_POST['name_sei']?><?php echo $_POST['name_mei']?></p>
+<p>氏名　　　　　　<?php echo htmlspecialchars($_POST['name_sei'])?><?php echo htmlspecialchars($_POST['name_mei'])?></p>
 <p>性別　　　　　　<?php echo $gender ?></p>
-<p>住所　　　　　　<?php echo $pref ?><?php echo $_POST['address']?></p>
+<p>住所　　　　　　<?php echo $pref ?><?php echo htmlspecialchars($_POST['address'])?></p>
 <p>パスワード　　　セキュリティのため非表示</p>
-<p>メールアドレス　<?php echo $_POST['email']?></p>
+<p>メールアドレス　<?php echo htmlspecialchars($_POST['email'])?></p>
 
 <form action ="member_end.php" method="post">
+    <input type="hidden" name="token" value="<?php echo $token;?>">
     <input type="submit" value="登録完了">
 </form>
-
+<br>
 <button type="button" onclick="location.href='member_regist.php'">前に戻る</button>
 
 
-<?php require '../footer.php'; ?>
+<?php require './footer.php'; ?>
