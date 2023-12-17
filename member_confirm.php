@@ -341,6 +341,7 @@ switch ($_POST['pref_name']){
 $_SESSION['original']['pref_nameName'] = $pref;
 
 ?>
+<div class="member_confirm-wrapper main">
 
 <h1>会員情報確認画面</h1>
 <p>氏名　　　　　　<?php echo htmlspecialchars($_POST['name_sei'])?><?php echo htmlspecialchars($_POST['name_mei'])?></p>
@@ -356,5 +357,6 @@ $_SESSION['original']['pref_nameName'] = $pref;
 <br>
 <button type="button" onclick="location.href='member_regist.php'">前に戻る</button>
 
+</div>
 
 <?php require './footer.php'; ?>

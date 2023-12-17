@@ -13,7 +13,7 @@ unset($_SESSION['original']);
 
 ?>
 
-<div class="form-wrapper">
+<div class="form-wrapper main">
 
 <h1>会員情報登録フォーム</h1>
 

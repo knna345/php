@@ -19,7 +19,7 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
 
 
 <?php if (isset($_SESSION['member'])) : ?>
-<div class="thread-wrapper">
+<div class="thread-wrapper main">
 
 <h1>スレッド作成フォーム</h1>
 
@@ -27,7 +27,7 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
 <table>
 <tr>
   <td>スレッドタイトル</td>
-  <td><input type="text" name="title" value="<?php echo isset($original['title']) ? $original['title'] : null;?>"></td>
+  <td><input type="text" name="title" size="48" value="<?php echo isset($original['title']) ? $original['title'] : null;?>"></td>
 </tr>
 <tr>
   <td></td>
@@ -54,7 +54,7 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
 <input type="submit" value="確認画面へ">
 </form>
 <br>
-<button type="button" onclick="location.href='top.php'">トップに戻る</button>
+<button type="button" onclick="location.href='thread.php'">一覧に戻る</button>
 
 </div>
 <?php endif; ?>

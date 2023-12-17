@@ -19,6 +19,7 @@ if(isset($_SESSION['member'])){
 }
 ?>
 
+<div class="login-wrapper main">
 
 <form action="login-output.php" method="post">
 
@@ -44,5 +45,7 @@ if(isset($_SESSION['member'])){
 
 <br>
 <form method = "post" action = "top.php"><button>トップに戻る</button></form>
+
+</div>
 
 <?php require './footer.php'; ?>

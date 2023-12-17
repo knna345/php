@@ -9,6 +9,8 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
 
 ?>
 
+<!--　ヘッダー　-->
+
 <?php if (isset($_SESSION['member'])) : ?>
     <header>
         <div class="header-left">
@@ -16,6 +18,7 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
         </div>
         <nav class="nav">
             <ul class="menu-group">
+                <li class="btn login-item"><a href="./thread.php">スレッド一覧</a></li>
                 <li class="btn login-item"><a href="./thread_regist.php">新規スレッド作成</a></li>
                 <li class="btn login-item"><a href="./logout.php">ログアウト</a></li>
             </ul>
@@ -24,10 +27,11 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
 <?php else : ?>
     <header>
         <div class="header-left">
-            　
+            
         </div>
         <nav class="nav">
             <ul class="menu-group">
+                <li class="btn logout-item"><a href="./thread.php">スレッド一覧</a></li>
                 <li class="btn logout-item"><a href="./member_regist.php">新規会員登録</a></li>
                 <li class="btn logout-item"><a href="./login.php">ログイン</a></li>
             </ul>
@@ -35,8 +39,8 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
     </header>
 <?php endif; ?>
 
-<?php 
+<div class="main">
 
-?>
+</div>
 
 <?php require './footer.php'; ?>

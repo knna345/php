@@ -24,9 +24,11 @@ if($token != "" && $token == $session_token) {
         $original['name_sei'], $original['name_mei'],  $original['gender'], 
         $original['pref_nameName'],  $original['address'], $original['password'], $original['email']
     ]);
+    echo '<div class= "main"'>
     echo '<h1>会員登録完了</h1>';
     echo '<p>会員登録が完了しました。</p>';
     echo '<form method = "post" action = "top.php"><button>トップに戻る</button></form>';
+    echo '</div>'
 }else{
     echo "不正な登録処理です";
 };

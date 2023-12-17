@@ -25,6 +25,9 @@ if(empty($_POST['content'])){
 if (mb_strlen($_POST['content'] , "UTF-8") > 500) {
     $_SESSION['flash']['contentLength'] = "コメントは５００文字以内で入力してください";
 }
+if(! empty($_POST['content'])){
+    $_SESSION['original']['contentHTML'] = htmlspecialchars($_POST['content']);
+}
 
 
 $_SESSION['original']['content'] = htmlspecialchars($_POST['content']);  //入力があった場合、一旦セッションに保存
@@ -46,23 +49,9 @@ $_SESSION['token'] = $token;
 
 ?>
 
+<div class="thread_confirm main">
 
 <h1>スレッド作成確認画面</h1>
-
-<!-- 
-    ｐタグでの表示
-    ｐタグ内で改行を指示して反映できるが、テーブル「コメント」からずれる 
-
--->
-
-<p>スレッドタイトル　　<?php echo htmlspecialchars($_POST['title'])?></p>
-<p>コメント　　　　　　<?php echo htmlspecialchars($_POST['content'])?></p>
-
-<!-- 
-    テーブルでの表示
-    改行の指示はおそらく置換、まだ悩み中
-    テーブルずれがあるかは未検証
--->
 
 <table>
 <tr>
@@ -71,8 +60,9 @@ $_SESSION['token'] = $token;
 </tr>
 <tr>
   <td valign="top">コメント　　　　　　</td>
-  <td><?php echo htmlspecialchars($_POST['content'])?></td>
+  <td><p><?php echo nl2br($_SESSION['original']['content']); ?></p></td>
 </tr>
+</table>
 
 <form action ="thread_end.php" method="post">
     <input type="hidden" name="token" value="<?php echo $token;?>">
@@ -83,5 +73,6 @@ $_SESSION['token'] = $token;
 <br>
 <button type="button" onclick="location.href='thread_regist.php'">前に戻る</button>
 
+</div>
 
 <?php require './footer.php'; ?>
