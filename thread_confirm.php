@@ -15,7 +15,7 @@ if(empty($_POST['title'])){
 if (mb_strlen($_POST['title'] , "UTF-8") > 100) {
     $_SESSION['flash']['titleLength'] = "スレッドタイトルは１００文字以内で入力してください";
 }
-$_SESSION['original']['title'] = htmlspecialchars($_POST['title']);  //入力があった場合、一旦セッションに保存
+$_SESSION['original']['title'] = $_POST['title'];  //入力があった場合、一旦セッションに保存
 
 
 //コメント----------
@@ -30,7 +30,7 @@ if(! empty($_POST['content'])){
 }
 
 
-$_SESSION['original']['content'] = htmlspecialchars($_POST['content']);  //入力があった場合、一旦セッションに保存
+$_SESSION['original']['content'] = $_POST['content'];  //入力があった場合、一旦セッションに保存
 
 
 
@@ -60,7 +60,7 @@ $_SESSION['token'] = $token;
 </tr>
 <tr>
   <td valign="top">コメント　　　　　　</td>
-  <td><p><?php echo nl2br($_SESSION['original']['content']); ?></p></td>
+  <td><p><?php echo nl2br(htmlspecialchars($_POST['content'])); ?></p></td>
 </tr>
 </table>
 
