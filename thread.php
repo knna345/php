@@ -47,38 +47,38 @@ unset($_SESSION['original']);
 
     <div class="thread_data">
 
-    <table>
-    <tr><td></td><td></td><td></td></tr>
-    <?php 
-    if (! empty($original['keyword'])){
-        //入力された場合----------
-        $sql = $pdo -> prepare('select * from threads where title like ? or content like ? order by created_at DESC');
-        $sql -> execute(['%'.$original['keyword'].'%', '%'.$original['keyword'].'%']);
-        foreach ($sql as $row) {
-            echo '<tr>';
-            echo '<td>ID:', $row['id'], '　</td>';
-            $br = '<br>';
-            echo '<td>', htmlspecialchars($row['title']), '　</td>';
-            $formattedDate = date("Y-m-d H:i", strtotime($row['created_at']));
-            echo '<td>', $formattedDate, '</td>';
-            echo '</tr>';
+        <table>
+        <tr><td></td><td></td><td></td></tr>
+        <?php 
+        if (! empty($original['keyword'])){
+            //入力された場合----------
+            $sql = $pdo -> prepare('select * from threads where title like ? or content like ? order by created_at DESC');
+            $sql -> execute(['%'.$original['keyword'].'%', '%'.$original['keyword'].'%']);
+            foreach ($sql as $row) {
+                echo '<tr>';
+                echo '<td>ID:', $row['id'], '　</td>';
+                $threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $row['id'];
+                echo '<td><a href="' . htmlspecialchars($threadLink) . '">', htmlspecialchars($row['title']), '</a>　</td>';
+                $formattedDate = date("Y-m-d H:i", strtotime($row['created_at']));
+                echo '<td>', $formattedDate, '</td>';
+                echo '</tr>';
+            }
+        }else{
+            //空欄の場合、すべての表示----------
+            foreach ($pdo -> query('select * from threads order by created_at DESC') as $row){
+                echo '<tr>';
+                echo '<td>ID:', $row['id'], '　</td>';
+                $threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $row['id'];
+                echo '<td><a href="' . htmlspecialchars($threadLink) . '">', htmlspecialchars($row['title']), '</a>　</td>';
+                $formattedDate = date("Y-m-d H:i", strtotime($row['created_at']));
+                echo '<td>', $formattedDate, '</td>';
+                echo '</tr>';
+            }
         }
-    }else{
-        //空欄の場合----------
-        foreach ($pdo -> query('select * from threads order by created_at DESC') as $row){
-            echo '<tr>';
-            echo '<td>ID:', $row['id'], '　</td>';
-            $br = '<br>';
-            echo '<td>', htmlspecialchars($row['title']), '　</td>';
-            $formattedDate = date("Y-m-d H:i", strtotime($row['created_at']));
-            echo '<td>', $formattedDate, '</td>';
-            echo '</tr>';
-        }
-    }
 
-    ?>
+        ?>
 
-    </table>
+        </table>
 
     </div>
 

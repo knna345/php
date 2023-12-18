@@ -44,3 +44,29 @@ header {
     margin: 0 auto;
     max-width: 800px;
 }
+
+/*---thread_detail スレッド詳細ページ---*/
+.centered {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.threadDetail{
+    margin: 0 auto;
+    max-width: 500px;
+    padding: 20px;
+    border: 1px solid teal;
+    border-radius: 20px;
+}
+
+.comment{
+    margin: 30px auto;
+    text-align: center;
+}
+
+.formbtn{
+    text-align: right;
+    padding-right: 125px;
+    padding-top: 20px;
+}
