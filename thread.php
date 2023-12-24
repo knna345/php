@@ -45,6 +45,7 @@ unset($_SESSION['original']);
     　　<input type="submit" value="スレッド検索">
 </form>
 
+
     <div class="thread_data">
 
         <table>
@@ -59,7 +60,7 @@ unset($_SESSION['original']);
                 echo '<td>ID:', $row['id'], '　</td>';
                 $threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $row['id'];
                 echo '<td><a href="' . htmlspecialchars($threadLink) . '">', htmlspecialchars($row['title']), '</a>　</td>';
-                $formattedDate = date("Y-m-d H:i", strtotime($row['created_at']));
+                $formattedDate = date("Y.n.j g:i", strtotime($row['created_at']));
                 echo '<td>', $formattedDate, '</td>';
                 echo '</tr>';
             }
@@ -70,7 +71,7 @@ unset($_SESSION['original']);
                 echo '<td>ID:', $row['id'], '　</td>';
                 $threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $row['id'];
                 echo '<td><a href="' . htmlspecialchars($threadLink) . '">', htmlspecialchars($row['title']), '</a>　</td>';
-                $formattedDate = date("Y-m-d H:i", strtotime($row['created_at']));
+                $formattedDate = date("Y.n.j g:i", strtotime($row['created_at']));
                 echo '<td>', $formattedDate, '</td>';
                 echo '</tr>';
             }

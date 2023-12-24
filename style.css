@@ -54,10 +54,16 @@ header {
 
 .threadDetail{
     margin: 0 auto;
+    margin-top: 80px;
     max-width: 500px;
-    padding: 20px;
     border: 1px solid teal;
     border-radius: 20px;
+}
+
+.threadComments{
+    margin: 0 auto;
+    margin-top: 80px;
+    max-width: 500px;
 }
 
 .comment{
@@ -65,8 +71,14 @@ header {
     text-align: center;
 }
 
-.formbtn{
+.formbtnright{
     text-align: right;
     padding-right: 125px;
-    padding-top: 20px;
 }
+
+
+/*---thread スレッド一覧ページ---*/
+.thread{
+    margin: 30px auto;
+}
+
