@@ -75,7 +75,6 @@ $commentsPerPage = 5;
 
 // 現在のページ番号（デフォルトは1）
 $currentPage = isset($_SESSION['currentPage']) ? $_SESSION['currentPage'] : 1;
-$_SESSION['currentPage'] = $currentPage;
 
 // コメントの開始位置
 $offset = ($currentPage - 1) * $commentsPerPage;
@@ -96,11 +95,9 @@ $totalComments = $result['total'];
 $totalPages = ceil($totalComments / $commentsPerPage);
 
 
-
-
 ?>
 
-<!-------------------------------------------------->
+<!---------------------------------------------------------------------->
 <!-------------------------------------------------->
 <!--　ヘッダー　-->
 
@@ -124,12 +121,36 @@ $totalPages = ceil($totalComments / $commentsPerPage);
 
 echo '<p class="centered">' .htmlspecialchars($thread['title']) . '</p>';
 $formattedDate = date("n/j/y g:i", strtotime($thread['created_at']));
-echo '<div class="detail" style="display: table;width: 100%;margin-bottom:20px;">
-        <p style="display: table-cell;width:150px;text-align: right;"></p>
-        <p class="detailLeft"  style="display: table-cell;text-align: center;">' . htmlspecialchars($totalComments) . 'コメント</p>
-        <p class="detailRight" style="display: table-cell;width:150px;text-align: right;">'. $formattedDate . '</p>
+echo '<div class="detail" style="display: table;width: 100%;margin-bottom: 20px;">
+        <p style="display: table-cell; width:150px; text-align: right;"></p>
+        <p class="detailLeft"  style="display: table-cell; text-align: center;">' . htmlspecialchars($totalComments) . 'コメント</p>
+        <p class="detailRight" style="display: table-cell; width:150px; text-align: right;">'. $formattedDate . '</p>
     </div>';
 ?>
+
+
+<!--　メイン　スレッドコメントページめくりリンク -->
+<div style="display: table; width: 100%; margin-bottom: 20px;">
+    <?php
+    //前へ
+    if ($currentPage > 1 ){
+        $_SESSION['currentPage'] = $currentPage - 1;
+        echo '<div style="display: table-cell; text-align: left;"> <a href=', $threadLink ,'>＜ 前へ</a></div>';
+    }elseif($currentPage == 1){
+        echo '<p style="display: table-cell; text-align: left; color:gray;">＜ 前へ</p>';
+    };
+
+    //次へ
+    if ($currentPage < $totalPages){
+        $_SESSION['currentPage'] = $currentPage + 1;
+        echo '<div style="display: table-cell; text-align: right;"><a href=', $threadLink, '>次へ ＞</a></div>';
+    }elseif($currentPage == $totalPages){
+        echo '<p style="display: table-cell; text-align: right; color:gray;">次へ ＞</p>';
+    }
+    ?>
+
+</div>
+
 
 
 <!--　メイン　スレッド詳細　-->
@@ -144,21 +165,26 @@ echo '<p>', nl2br(htmlspecialchars($thread['content'])) ,'</p>';
 
 </div>
 
-<!--　メイン　スレッドコメント５件ずつ表示　｜　表示されない、かつコメントがある場合コメントフォームが表示されない　-->
+
+<!--　メイン　スレッドコメント５件ずつ表示 -->
 <div class="threadComments">
 
 <?php
-if ($totalComments >= '1'){
-    //データベース接続、コメント取得 わからん！
-    $sqlComments = $pdo -> prepare('select * from comments where thread_id = ? ORDER BY created_at DESC LIMIT 5 OFFSET ?');
-    $sqlComments -> execute([$thread['id'], $offset]);
-    foreach ($sqlComments as $row) {
-        echo $row['comment'];
+if ($totalComments >= 1){
+    //データベース接続、コメント取得
+    $sqlComments = $pdo -> prepare('SELECT comments.*, members.name_sei, members.name_mei FROM comments 
+                                    JOIN members ON comments.member_id = members.id WHERE thread_id = ? ORDER BY created_at ASC LIMIT ?,5 ');
+    $sqlComments -> execute([$thread['id'], $offset, PDO::PARAM_INT]);
+    $i = $offset + 1;
+    foreach ($sqlComments as $com) {
+        $formattedDate = date("Y.n.j H:i", strtotime($com['created_at']));
+        echo '<p>',$i, '.　', $com['name_sei'], '　', $com['name_mei'], '　', $formattedDate, '</p>';
+        echo '<p>', $com['comment'], '</p>';
+        echo '<hr size="1px" width="100%" align="center">';
+        $i = $i + 1;
     }
-    foreach ($_SESSION['comments'] as $key) {
-        echo  $key['comment'];
-    };
 }
+
 ?>
 
 </div>
@@ -166,7 +192,7 @@ if ($totalComments >= '1'){
 <!--　メイン　コメント投稿フォーム || ログイン時のみ表示　-->
 <div class="comment">
 
-<?php if(isset($_SESSION['member'])) : ?>
+<?php if(isset($member['id'])) : ?>
 
 <form action="" method="post">
     <textarea name="comment" rows="10" cols="75" wrap="hard"></textarea>

@@ -17,6 +17,7 @@ $_SESSION['original']['keyword'] = $_POST['keyword'];
 $original = isset($_SESSION['original']) ? $_SESSION['original'] : [];
 unset($_SESSION['original']);
 
+unset($_SESSION['currentPage']);
 ?>
 
 
@@ -61,7 +62,7 @@ unset($_SESSION['original']);
                 $threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $row['id'];
                 echo '<td><a href="' . htmlspecialchars($threadLink) . '">', htmlspecialchars($row['title']), '</a>　</td>';
                 $formattedDate = date("Y.n.j g:i", strtotime($row['created_at']));
-                echo '<td>', $formattedDate, '</td>';
+                echo '<td style="width:150px;">', $formattedDate, '</td>';
                 echo '</tr>';
             }
         }else{
@@ -72,7 +73,7 @@ unset($_SESSION['original']);
                 $threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $row['id'];
                 echo '<td><a href="' . htmlspecialchars($threadLink) . '">', htmlspecialchars($row['title']), '</a>　</td>';
                 $formattedDate = date("Y.n.j g:i", strtotime($row['created_at']));
-                echo '<td>', $formattedDate, '</td>';
+                echo '<td style="width:150px;">', $formattedDate, '</td>';
                 echo '</tr>';
             }
         }
