@@ -41,40 +41,15 @@ foreach ($sqlThreadMember as $row) {
 $threadMember = isset($_SESSION['threadMember']) ? $_SESSION['threadMember'] : [];
 unset($_SESSION['threadMember']);
 
-
-//-----------------------------------------------
-//メッセージのPOST
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //エラーメッセージ
-    if(mb_strlen($_POST['comment']) === 0){
-        $_SESSION['flash']['comment'] = '※コメントを入力してください';
-    }elseif (mb_strlen($_POST['comment'] , "UTF-8") > 500) {
-        $_SESSION['flash']['commentLength'] = "※コメントは５００文字以内で入力してください";
-    };
-    $flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : [];
-}
-unset($_SESSION['flash']);
-
-
-//DBに登録
-$threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $thread['id'];
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !(isset($flash['comment'])) && !(isset($flash['commentLength']))){
-    $pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'password');
-    $sqlDB = $pdo -> prepare('insert into comments values(null,?,?,?,now(),now(),null)');
-    $sqlDB -> execute([$_SESSION['member']['id'], $thread['id'], $_POST['comment']]);
-    header("Location: $threadLink");
-    exit();
-}
-
-
 //-----------------------------------------------
 ///DBから~~~スレッドコメント~~~受け取り
 // 1ページあたりのコメント数
 $commentsPerPage = 5;
 
-// 現在のページ番号（デフォルトは1）
-$currentPage = isset($_SESSION['currentPage']) ? $_SESSION['currentPage'] : 1;
+// 現在のページ番号を取得（デフォルトは1）
+$currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+unset($_GET['page']);
+$_SESSION['currentPage'] = $currentPage;
 
 // コメントの開始位置
 $offset = ($currentPage - 1) * $commentsPerPage;
@@ -93,6 +68,38 @@ $totalComments = $result['total'];
 //-----------------------------------------------
 // 総ページ数を計算、「次へ」「前へ」
 $totalPages = ceil($totalComments / $commentsPerPage);
+
+
+
+//-----------------------------------------------
+//メッセージのPOST
+unset($flash);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //エラーメッセージ
+    if(mb_strlen($_POST['comment']) === 0){
+        $_SESSION['flash']['comment'] = '※コメントを入力してください';
+    };
+    $commentWithoutNewlines = str_replace(["\r", "\n"], '', $_POST['comment']);
+    if(mb_strlen($commentWithoutNewlines , 'UTF-8') > 500){
+        $_SESSION['flash']['commentLength'] = "※コメントは５００文字以内で入力してください";
+    };
+    $flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : [];
+}
+unset($_SESSION['flash']);
+
+
+
+//DBに登録
+$threadLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $thread['id'].'&page=' . $currentPage;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment']) && !(isset($flash['comment'])) && !(isset($flash['commentLength']))){
+    $pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'password');
+    $sqlDB = $pdo -> prepare('insert into comments values(null,?,?,?,now(),now(),null)');
+    $sqlDB -> execute([$_SESSION['member']['id'], $thread['id'], $_POST['comment']]);
+    header("Location: $threadLink");
+    exit();
+}
+
 
 
 ?>
@@ -128,27 +135,29 @@ echo '<div class="detail" style="display: table;width: 100%;margin-bottom: 20px;
     </div>';
 ?>
 
-
 <!--　メイン　スレッドコメントページめくりリンク -->
 <div style="display: table; width: 100%; margin-bottom: 20px;">
     <?php
+
     //前へ
     if ($currentPage > 1 ){
-        $_SESSION['currentPage'] = $currentPage - 1;
-        echo '<div style="display: table-cell; text-align: left;"> <a href=', $threadLink ,'>＜ 前へ</a></div>';
+        $threadPrevPageLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' .  $thread['id'] .'&page=' . $currentPage -1;
+        echo '<div style="display: table-cell; text-align: left;"> <a href=', $threadPrevPageLink ,'>＜ 前へ</a></div>';
     }elseif($currentPage == 1){
         echo '<p style="display: table-cell; text-align: left; color:gray;">＜ 前へ</p>';
     };
 
+
     //次へ
     if ($currentPage < $totalPages){
-        $_SESSION['currentPage'] = $currentPage + 1;
-        echo '<div style="display: table-cell; text-align: right;"><a href=', $threadLink, '>次へ ＞</a></div>';
-    }elseif($currentPage == $totalPages){
+        $threadNextPageLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $thread['id'] .'&page=' . $currentPage +1;
+        echo '<div style="display: table-cell; text-align: right;"><a href=', $threadNextPageLink, '>次へ ＞</a></div>';
+    }elseif($currentPage > $totalPages || $currentPage == $totalPages){
         echo '<p style="display: table-cell; text-align: right; color:gray;">次へ ＞</p>';
     }
-    ?>
 
+
+    ?>
 </div>
 
 
@@ -174,13 +183,45 @@ if ($totalComments >= 1){
     //データベース接続、コメント取得
     $sqlComments = $pdo -> prepare('SELECT comments.*, members.name_sei, members.name_mei FROM comments 
                                     JOIN members ON comments.member_id = members.id WHERE thread_id = ? ORDER BY created_at ASC LIMIT ?,5 ');
-    $sqlComments -> execute([$thread['id'], $offset, PDO::PARAM_INT]);
+    $sqlComments->bindValue(1, $thread['id'], PDO::PARAM_INT);
+    $sqlComments->bindValue(2, $offset, PDO::PARAM_INT);
+    $sqlComments->execute();
     $i = $offset + 1;
     foreach ($sqlComments as $com) {
         $formattedDate = date("Y.n.j H:i", strtotime($com['created_at']));
-        echo '<p>',$i, '.　', $com['name_sei'], '　', $com['name_mei'], '　', $formattedDate, '</p>';
-        echo '<p>', $com['comment'], '</p>';
-        echo '<hr size="1px" width="100%" align="center">';
+        //コメ投稿者情報-------
+        echo '<p>',$i, '.　', htmlspecialchars($com['name_sei']), '　', htmlspecialchars($com['name_mei']), '　', $formattedDate, '</p>';
+        //コメント-------
+        echo '<p class="comment-text">', nl2br(htmlspecialchars($com['comment'])), '</p>';
+
+        //いいねボタン------------------------
+        $threadCommentLike = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail_like.php?id=' .  $thread['id'] . '&comId=' .  $com['id'];
+        $threadCommentLikeDelete = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail_likeDelete.php?id=' .  $thread['id'] . '&comId=' .  $com['id'];
+
+        $likeCount = $pdo->prepare('SELECT count(*) as total from likes where comment_id = ?');
+        $likeCount -> execute([$com['id']]);
+        $result = $likeCount -> fetch(PDO::FETCH_ASSOC);
+        $totallikes = $result['total'];
+
+        $like = $pdo->prepare('SELECT count(*) as total from likes where comment_id = ? and member_id = ?');
+        $like -> execute([$com['id'], $member['id']]);
+        $resultlike = $like -> fetch(PDO::FETCH_ASSOC);
+        $loginlike = $resultlike['total'];
+
+        if((isset($member['id'])) &&  $loginlike === "0"){ 
+            //ログインしている場合　かつ　押していない場合
+            echo '<p style="text-align: right;"><a href="' . $threadCommentLike . '"><i class="fa-regular fa-heart"></i>　'. $totallikes.'</p>';
+        }elseif((isset($member['id'])) &&  $loginlike === "1"){ 
+            //ログインしている場合　かつ　すでに押している場合
+            echo '<p style="text-align: right;"><a href="' . $threadCommentLikeDelete . '"><i class="fa-solid fa-heart" style="color: red;"></i>　'. $totallikes.'</p>';
+        }else{ 
+            //ログアウトの場合登録フォーム
+            $memberRegistLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/member_regist.php';
+            echo '<p style="text-align: right;"><a href="' . $memberRegistLink . '"><i class="fa-regular fa-heart"></i>　'. $totallikes.'</p>';
+        }
+
+        //アンダーライン-------
+        echo '<hr size="1px" width="100%" align=";center">';
         $i = $i + 1;
     }
 }
@@ -189,13 +230,38 @@ if ($totalComments >= 1){
 
 </div>
 
+<!--　メイン　スレッドコメントページめくりリンク -->
+<div style="display: table; width: 100%; margin-bottom: 20px; margin-top: 30px;">
+    <?php
+
+    //前へ
+    if ($currentPage > 1 ){
+        $threadPrevPageLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' .  $thread['id'] .'&page=' . $currentPage -1;
+        echo '<div style="display: table-cell; text-align: left;"> <a href=', $threadPrevPageLink ,'>＜ 前へ</a></div>';
+    }elseif($currentPage == 1){
+        echo '<p style="display: table-cell; text-align: left; color:gray;">＜ 前へ</p>';
+    };
+
+
+    //次へ
+    if ($currentPage < $totalPages){
+        $threadNextPageLink = 'http://ik1-219-79869.vs.sakura.ne.jp/php/thread_detail.php?id=' . $thread['id'] .'&page=' . $currentPage +1;
+        echo '<div style="display: table-cell; text-align: right;"><a href=', $threadNextPageLink, '>次へ ＞</a></div>';
+    }elseif($currentPage > $totalPages || $currentPage == $totalPages){
+        echo '<p style="display: table-cell; text-align: right; color:gray;">次へ ＞</p>';
+    }
+
+
+    ?>
+</div>
+
 <!--　メイン　コメント投稿フォーム || ログイン時のみ表示　-->
 <div class="comment">
 
 <?php if(isset($member['id'])) : ?>
 
 <form action="" method="post">
-    <textarea name="comment" rows="10" cols="75" wrap="hard"></textarea>
+    <textarea name="comment" rows="10" cols="70"></textarea>
     <!-- エラーメッセージがセットされている場合に表示 -->
         <?php echo isset($flash['comment']) ? '<br>'.$flash['comment'] : null ?>
         <?php echo isset($flash['commentLength']) ? '<br>'.$flash['commentLength'] : null ?>
