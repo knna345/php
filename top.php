@@ -11,7 +11,7 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
 
 <!--　ヘッダー　-->
 
-<?php if (isset($_SESSION['member'])) : ?>
+<?php if (isset($_SESSION['member'])) : //ログイン時 ?>
     <header>
         <div class="header-left">
             <?php echo 'ようこそ',$member['name_sei'],$member['name_mei'],'様'?>
@@ -24,7 +24,12 @@ $member = isset($_SESSION['member']) ? $_SESSION['member'] : [];
             </ul>
         </nav>
     </header>
-<?php else : ?>
+    <footer>
+        <div class="withdrawal-button btn">
+            <a href="member_withdrawal.php">退会</a>
+        </div>
+    </footer>
+<?php else : //ログアウト時 ?>
     <header>
         <div class="header-left">
             

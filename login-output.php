@@ -10,7 +10,7 @@ $_SESSION['original']['email'] = htmlspecialchars($_POST['email']);
 
 //DB接続
 $pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'password');
-$sql = $pdo -> prepare('select * from members where email=? and password=?');
+$sql = $pdo -> prepare('SELECT * from members where email=? and password=? and deleted_at is NULL');
 $sql -> execute([$_REQUEST['email'], $_REQUEST['password']]);
 foreach ($sql as $row) {
     $_SESSION['member']=[

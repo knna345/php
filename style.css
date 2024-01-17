@@ -19,6 +19,17 @@ header {
     height: 90px;
 }
 
+footer {
+    position: absolute;
+    bottom: 0;
+    background-color: beige;
+    height: 90px;
+    width: 99%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
 .header-left{
     float: left;
     font-size: 24px;
@@ -38,6 +49,11 @@ header {
     background-color: white;
     margin-right: 20px;
   }
+
+.withdrawal-button{
+    padding-top: 8px;
+}
+
 
 /*---thread_confirm スレッド確認ページ---*/
 .main{
@@ -59,6 +75,10 @@ header {
     border: 1px solid teal;
     border-radius: 20px;
     padding: 30px;
+}
+
+.comment-text {
+    word-break: break-all;
 }
 
 .threadComments{
