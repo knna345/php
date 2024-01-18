@@ -24,6 +24,13 @@ $admin = isset($_SESSION['admin']) ? $_SESSION['admin'] : [];
             </ul>
         </nav>
     </header>
+
+    <div class = "main" style=" text-align: center; margin-top: 50px; ">
+        <div class= "btn">
+        <a href="./member.php">会員一覧</a>
+        </div>
+    </div>
+
 <?php else : //ログアウト時 ?>
     <header>
         <div class="header-left">
