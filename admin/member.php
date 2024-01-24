@@ -4,6 +4,9 @@
 session_start();
 
 
+//DB接続
+$pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8;", 'staff', 'password');
+
 //ログインしている場合
 
 $admin = isset($_SESSION['admin']) ? $_SESSION['admin'] : [];
@@ -11,16 +14,20 @@ $admin = isset($_SESSION['admin']) ? $_SESSION['admin'] : [];
 
 //----------------------------------------------------
 //入力があった場合、一旦セッションに保存
-$_SESSION['search']['id'] = $_POST['id']; 
-$_SESSION['search']['gender1'] = $_POST['gender1']; 
-$_SESSION['search']['gender2'] = $_POST['gender2']; 
-$_SESSION['search']['pref_name'] = $_POST['pref_name']; 
-$_SESSION['search']['freeword'] = $_POST['freeword']; 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_SESSION['search']['id'] = $_POST['id']; 
+    $_SESSION['search']['gender1'] = $_POST['gender1']; 
+    $_SESSION['search']['gender2'] = $_POST['gender2']; 
+    $_SESSION['search']['pref_name'] = $_POST['pref_name']; 
+    $_SESSION['search']['freeword'] = $_POST['freeword']; 
 
-//検索ワードに上書き
-$search = isset($_SESSION['search']) ? $_SESSION['search'] : [];
+    //検索ワードに上書き
+    unset($search);
+}
+    $search = isset($_SESSION['search']) ? $_SESSION['search'] : [];
 
-unset($_SESSION['search']);
+
+
 
 //----------------------------------------------------
 ///DBから~~~メンバー情報~~~受け取り
@@ -35,8 +42,34 @@ $_SESSION['searchCurrentPage'] = $currentPage;
 // コメントの開始位置
 $offset = ($currentPage - 1) * $membersPerPage;
 
+
+//昇順・降順
+// ソートの初期値を設定
+$sortField = isset($_SESSION['sortField']) ? $_SESSION['sortField'] : 'id';
+$sortOrder = isset($_SESSION['sortOrder']) ? $_SESSION['sortOrder'] : 'DESC';
+
+// ソートリンクがクリックされた場合の処理
+if (isset($_GET['sortField'])) {
+    $clickedField = $_GET['sortField'];
+
+    // クリックされたフィールドが現在のソートフィールドと同じ場合、ソート順を切り替える
+    if (($clickedField == $sortField) AND $sortOrder == 'ASC') {
+            $sortOrder = 'DESC';
+    } elseif (($clickedField == $sortField) AND $sortOrder == 'DESC') {
+            $sortOrder = 'ASC';
+    } else {
+        // クリックされたフィールドが異なる場合、ソートフィールドと順序を更新する
+        $sortField = $clickedField;
+        $sortOrder = 'DESC';
+    }
+
+    // セッションにソート情報を保存
+    $_SESSION['sortField'] = $sortField;
+    $_SESSION['sortOrder'] = $sortOrder;
+}
 ?>
 
+<?php if (isset($_SESSION['admin'])) : //ログイン時 ?>
 <!---------------------------------------　ヘッダー　------------------------------------------>
 <header>
         <div class="header-left">
@@ -51,7 +84,7 @@ $offset = ($currentPage - 1) * $membersPerPage;
 
 <!----------------------------------------　メイン　検索フォーム　------------------------------------------>
 <div class = "main" style=" margin-top: 50px; ">
-    <form action="" method="post">
+    <form action="https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php" method="post">
     <table border="1" width="500" style="border-collapse: collapse; margin: auto;" class="search">
         <tr>
             <th>ID</th>
@@ -117,7 +150,7 @@ $offset = ($currentPage - 1) * $membersPerPage;
         </tr>
         <tr>
             <th>フリーワード</th>
-            <td><input type="text" name="freeword" value="<?php echo isset($search['freeword']) ? $search['freeword'] : null;?>"></td>
+            <td><input type="text" name="freeword" value="<?php echo isset($search['freeword'] ) ? $search['freeword']  : null;?>"></td>
         </tr>
     </table>
     <br>
@@ -128,69 +161,164 @@ $offset = ($currentPage - 1) * $membersPerPage;
 <!----------------------------------------　メイン　検索結果　------------------------------------------>
 <?php
 
+
 ?>
 
 <div class = "main" style=" margin-top: 50px; ">
     <table border="1"  width="700" style="border-collapse: collapse; margin: auto;" class="resultSearch">
         <tr>
-            <td>ID</td>
-            <td>氏名</td>
-            <td>性別</td>
-            <td>住所</td>
-            <td>登録日時</td>
+            <th>ID<a href="?sortField=id">
+                <?php 
+                if($sortField == 'id' AND $sortOrder === 'ASC'){
+                    echo '▲';
+                }elseif($sortField == 'id' AND $sortOrder === 'DESC'){
+                    echo '▼';
+                }else{
+                    echo '▼';
+                }?></a>
+            </th>
+            <th>氏名</th>
+            <th>性別</th>
+            <th>住所</th>
+            <th>登録日時<a href="?sortField=created_at">
+                <?php
+                if($sortField == 'created_at' AND $sortOrder === 'ASC'){
+                    echo '▲';
+                }elseif($sortField == 'created_at' AND $sortOrder === 'DESC'){
+                    echo '▼';
+                }else{
+                    echo '▼';
+                }?></a>
+            </th>
         </tr>
 
             <?php
-        
-            //データベース接続、メンバー情報取得
-            $sql = 'SELECT * FROM members WHERE 1';
-            $params = [];
+            //-----------------------------------------------
+            //データベース接続、メンバー情報取得、メンバー情報総数取得
+            $sql = 'SELECT * FROM members WHERE 1 = 1';
+            $sqlCount = 'SELECT count(*) AS total FROM members WHERE 1 = 1';
+
             //ID
             if (!empty($search['id'])) {
                 $sql .= " AND id = :id";
-                $params[':id'] = $search['id'];
+                $sqlCount .= " AND id = :id";
             }
             //gender
             if ((!empty($search['gender1'])) && (!empty($search['gender2'])) ) { //男性・女性
                 $sql .= " AND ( gender = :gender1 OR gender = :gender2 )" ;
-                $params[':gender1'] = $search['gender1'];
-                $params[':gender2'] = $search['gender2'];
+                $sqlCount .= " AND ( gender = :gender1 OR gender = :gender2 )" ;
             }elseif(!empty($search['gender1'])){ //男性
                 $sql .= " AND gender = :gender1" ;
-                $params[':gender1'] = $search['gender1'];
+                $sqlCount .= " AND gender = :gender1" ;
             }elseif(!empty($search['gender2'])) { //女性
                 $sql .= " AND gender = :gender2";
-                $params[':gender2'] = $search['gender2'];
+                $sqlCount .= " AND gender = :gender2";
             }
             //都道府県
             if (!empty($search['pref_name'])) {
                 $sql .= " AND pref_name = :pref_name";
-                $params[':pref_name'] = $search['pref_name'];
+                $sqlCount .= " AND pref_name = :pref_name";
             }
             //フリーワード　名前（名・姓）・メール
             if (!empty($search['freeword'])) {
                 $sql .= " AND (name_sei LIKE :freeword OR name_mei LIKE :freeword OR email LIKE :freeword)";
-                $params[':freeword'] = '%' . $search['freeword'] . '%';
+                $sqlCount .= " AND (name_sei LIKE :freeword OR name_mei LIKE :freeword OR email LIKE :freeword)";
             }
-            $sql .= " LIMIT :offset, 10";
-            $params[':offset'] = $offset;
 
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
+            //sort
+            $sql .= " ORDER BY $sortField $sortOrder";
             
+            //offset
+            $sql .= " LIMIT :offset, 10";
 
+            
+            //-----------------------------------------------
+            //メンバー情報検索を取得,SQL文---------
+            $stmt = $pdo->prepare($sql);
+
+            //bindValue if文--------
+            //ID
+            if (!empty($search['id'])) {
+                $stmt->bindValue(':id', $search['id'], PDO::PARAM_INT);
+            }
+            //gender
+            if((!empty($search['gender1'])) && (!empty($search['gender2']))){
+                $stmt->bindValue(':gender1', $search['gender1'], PDO::PARAM_INT);
+                $stmt->bindValue(':gender2', $search['gender2'], PDO::PARAM_INT);
+            }elseif(!empty($search['gender1'])){
+                $stmt->bindValue(':gender1', $search['gender1'], PDO::PARAM_INT);
+            }elseif(!empty($search['gender2'])) {
+                $stmt->bindValue(':gender2', $search['gender2'], PDO::PARAM_INT);
+            }
+            //prefName
+            if (!empty($search['pref_name'])) {
+                $stmt->bindValue(':pref_name', $search['pref_name'], PDO::PARAM_STR);
+            }
+            //freeword
+            if (!empty($search['freeword'])) {
+                $stmt->bindValue(':freeword', '%'.$search['freeword'].'%', PDO::PARAM_STR);
+            }
+
+            //offset---これはいつでもいる
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+            //PDO実行--------------
+            $stmt->execute();
+
+
+            //-----------------------------------------------
+            //検索結果に基づくデータベースからの総出力数を取得,SQL文
+            $sqlCountMembers = $pdo->prepare($sqlCount);
+
+            //bindValue if文-------
+            //ID
+            if (!empty($search['id'])) {
+                $sqlCountMembers->bindValue(':id', $search['id'], PDO::PARAM_INT);
+            }
+            //gender
+            if((!empty($search['gender1'])) && (!empty($search['gender2']))){
+                $sqlCountMembers->bindValue(':gender1', $search['gender1'], PDO::PARAM_INT);
+                $sqlCountMembers->bindValue(':gender2', $search['gender2'], PDO::PARAM_INT);
+            }elseif(!empty($search['gender1'])){
+                $sqlCountMembers->bindValue(':gender1', $search['gender1'], PDO::PARAM_INT);
+            }elseif(!empty($search['gender2'])) {
+                $sqlCountMembers->bindValue(':gender2', $search['gender2'], PDO::PARAM_INT);
+            }
+            //prefName
+            if (!empty($search['pref_name'])) {
+                $sqlCountMembers->bindValue(':pref_name', $search['pref_name'], PDO::PARAM_STR);
+            }
+            //freeword
+            if (!empty($search['freeword'])) {
+                $sqlCountMembers->bindValue(':freeword', '%'.$search['freeword'].'%', PDO::PARAM_STR);
+            }
+
+            //PDO実行-------------
+            $sqlCountMembers->execute();
+            $result = $sqlCountMembers -> fetch(PDO::FETCH_ASSOC);
+            $totalMembers = $result['total'];
+
+
+
+            //-----------------------------------------------
+            // 総ページ数を計算、「次へ」「前へ」
+            $totalPages = ceil($totalMembers / $membersPerPage);
+
+
+            //-----------------------------------------------
+            //検索結果の出力
             foreach($stmt as $result){
                 echo '<tr>';
-                echo '<th>'. $result['id'].'</th>';
-                echo '<th>'. $result['name_sei']. "　" . $result['name_mei']. '</th>';
-                if($result['gender'] === 1){
+                echo '<td>'. $result['id'].'</td>';
+                echo '<td>'. $result['name_sei']. "　" . $result['name_mei']. '</td>';
+                if($result['gender'] === "1"){
                     $gender = "男性";
-                }elseif($result['gender'] === 2){
+                }elseif($result['gender'] === "2"){
                     $gender = "女性";
                 };
-                echo '<th>'. $gender.'</th>';
-                echo '<th>'. $result['pref_name']. $result['address']. '</th>';
-                echo '<th>'. $result['email'].'</th>';
+                echo '<td>'. $gender.'</td>';
+                echo '<td>'. $result['pref_name']. $result['address']. '</td>';
+                echo '<td>'. $result['created_at'].'</td>';
                 echo '</tr>';
             }
         
@@ -198,8 +326,44 @@ $offset = ($currentPage - 1) * $membersPerPage;
 
     </table>
 
+<!--　メイン　会員情報ページめくりリンク -->
+<div style="display: table; width: 40%; margin: 0 auto; margin-bottom: 20px; margin-top: 30px;">
+
+    <?php
+    //前へ
+    if ($currentPage > 1 ){
+        $memberPrevPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage -1;
+        echo '<div style="display: table-cell; text-align: left;"> <a href=', $memberPrevPageLink ,'>＜ 前へ</a></div>';
+    }elseif($currentPage == 1){
+        echo '<p style="display: table-cell; text-align: left; color:gray;">　 　　</p>';
+    };
+
+    //ページめくり　3ページ分
+    $memberPrevPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage -1;
+    $memberNextPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +1;
+
+    if($currentPage > 1){
+    echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberPrevPageLink ,'>'. $currentPage -1 . '</a></div>';
+    }
+    echo '<p style="display: table-cell; text-align: center; background-color: darkgray; border: 1px solid #000;">'. $currentPage .'</p>';
+    if($currentPage < $totalPages){
+    echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberNextPageLink ,'>'. $currentPage +1 . '</a></div>';
+    }
+
+    //次へ
+    if ($currentPage < $totalPages){
+        $memberNextPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +1;
+        echo '<div style="display: table-cell; text-align: right;"><a href=', $memberNextPageLink, '>次へ ＞</a></div>';
+    }elseif($currentPage > $totalPages || $currentPage == $totalPages){
+        echo '<p style="display: table-cell; text-align: right; color:gray;">　 　　</p>';
+    }
+    ?>
+
 </div>
 
 
+</div>
+
+<?php endif; ?>
 
 <?php require '../footer.php'; ?>

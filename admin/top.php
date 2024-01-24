@@ -8,6 +8,9 @@ session_start();
 
 $admin = isset($_SESSION['admin']) ? $_SESSION['admin'] : [];
 
+unset($_SESSION['search']);
+unset($_SESSION['sortField']);
+unset($_SESSION['sortOrder']);
 ?>
 
 <!--　ヘッダー　-->
