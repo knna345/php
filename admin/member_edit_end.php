@@ -16,16 +16,18 @@ unset($_SESSION["token"]);
 $original = isset($_SESSION['original']) ? $_SESSION['original'] : [];
 unset($_SESSION['original']);
 
+echo $original['name_sei'];
+
 // POSTされたトークンとセッション変数のトークンの比較
 if($token != "" && $token == $session_token) {
     $pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'password');
     $sql = 'UPDATE members SET name_sei = :name_sei, name_mei = :name_mei, gender = :gender, pref_name = :pref_name, address = :address';
 
     if(isset($original['password'])){
-        $sql .= ' , password = :password';
+        $sql .= " , password = :password";
     }
 
-    $sql .= ' , email = :email, updated_at = now() WHERE id = :id';
+    $sql .= " , email = :email, updated_at = now() WHERE id = :id";
 
     $update = $pdo->prepare($sql);
 

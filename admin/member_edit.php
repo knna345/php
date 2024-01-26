@@ -6,8 +6,8 @@ session_start();
 
 
 //ログインしている場合
-
 $admin = isset($_SESSION['admin']) ? $_SESSION['admin'] : [];
+
 
 // セッションのflashメッセージをクリア
 $flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : [];
@@ -21,6 +21,7 @@ unset($_SESSION['original']);
 //-------------------------------
 //会員IDの取得
 $getId = isset($_GET['id']) ? $_GET['id'] : [];
+unset($_SESSION['edit']);
 
 //会員IDに基づいてデータベースから受け取り
 $pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'password');
@@ -33,6 +34,7 @@ foreach ($sql as $row) {
         'address' => $row['address'], 'password' => $row['password'],
         'email' => $row['email']];
 }
+
 
 ?>
 

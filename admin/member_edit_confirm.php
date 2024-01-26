@@ -7,6 +7,7 @@ $pdo = new PDO("mysql:host=localhost;dbname=php;charset=utf8mb4;", 'staff', 'pas
 
 
 unset($_SESSION['original']);
+unset($_SESSION['flash']);
 
 //表示したいエラーメッセージ
 
@@ -131,6 +132,7 @@ $_SESSION['original']['email'] = htmlspecialchars($_POST['email']);  //入力が
 //}
 
 //エラーメッセージが出る場合フォームに返す----------
+$url = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member_edit.php?id=' . $_SESSION['edit']['id'];
 if(! empty($_SESSION['flash'])){
     $url = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member_edit.php?id=' . $_SESSION['edit']['id'];
     header('Location:' .$url);
@@ -198,7 +200,7 @@ switch ($_POST['gender']){
     <td><?php echo htmlspecialchars($_POST['email'])?></td></tr>
 </table>
 
-<form action ="member_regist_end.php" method="post">
+<form action ="member_edit_end.php" method="post">
     <input type="hidden" name="token" value="<?php echo $token;?>">
     <input type="submit" value="登録完了">
 </form>
