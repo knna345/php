@@ -344,6 +344,7 @@ $_SESSION['original']['pref_nameName'] = $pref;
 
 ?>
 
+<?php if (isset($_SESSION['admin'])) : //ログイン時 ?>
 <!---------------------------------------　ヘッダー　------------------------------------------>
 <header>
         <div class="header-left">
@@ -390,4 +391,5 @@ $_SESSION['original']['pref_nameName'] = $pref;
 
 </div>
 
+<?php endif; ?>
 <?php require '../footer.php'; ?>

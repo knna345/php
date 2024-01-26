@@ -162,7 +162,7 @@ switch ($_POST['gender']){
 
 
 ?>
-
+<?php if (isset($_SESSION['admin'])) : //ログイン時 ?>
 <!---------------------------------------　ヘッダー　------------------------------------------>
 <header>
         <div class="header-left">
@@ -209,5 +209,7 @@ switch ($_POST['gender']){
 <button type="button" onclick="location.href='<?php echo $url; ?>' ">前に戻る</button>
 
 </div>
+
+<?php endif; ?>
 
 <?php require '../footer.php'; ?>

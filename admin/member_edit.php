@@ -37,7 +37,7 @@ foreach ($sql as $row) {
 
 
 ?>
-
+<?php if (isset($_SESSION['admin'])) : //ログイン時 ?>
 <!---------------------------------------　ヘッダー　------------------------------------------>
 <header>
         <div class="header-left">
@@ -246,5 +246,5 @@ foreach ($sql as $row) {
 </form>
 
 </div>
-
+<?php endif; ?>
 <?php require '../footer.php'; ?>

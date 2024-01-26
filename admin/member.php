@@ -196,6 +196,7 @@ if (isset($_GET['sortField'])) {
                 }?></a>
             </th>
             <th>編集</th>
+            <th>詳細</th>
         </tr>
 
             <?php
@@ -230,7 +231,8 @@ if (isset($_GET['sortField'])) {
                 $sql .= " AND (name_sei LIKE :freeword OR name_mei LIKE :freeword OR email LIKE :freeword)";
                 $sqlCount .= " AND (name_sei LIKE :freeword OR name_mei LIKE :freeword OR email LIKE :freeword)";
             }
-
+            //delete
+            $sql .= " AND deleted_at is NULL";
             //sort
             $sql .= " ORDER BY $sortField $sortOrder";
             
@@ -264,6 +266,9 @@ if (isset($_GET['sortField'])) {
             if (!empty($search['freeword'])) {
                 $stmt->bindValue(':freeword', '%'.$search['freeword'].'%', PDO::PARAM_STR);
             }
+
+            //delete
+            $sql .= " AND deleted_at is NULL";
 
             //offset---これはいつでもいる
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -314,9 +319,10 @@ if (isset($_GET['sortField'])) {
             //-----------------------------------------------
             //検索結果の出力
             foreach($stmt as $result){
+                $memberDetailPage = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member_detail.php?id=' . $result['id'] ;
                 echo '<tr>';
                 echo '<td>'. $result['id'].'</td>';
-                echo '<td>'. $result['name_sei']. "　" . $result['name_mei']. '</td>';
+                echo '<td><a style="color: blue;" href=' , $memberDetailPage ,'>'. $result['name_sei']. "　" . $result['name_mei']. '</a></td>';
                 if($result['gender'] === "1"){
                     $gender = "男性";
                 }elseif($result['gender'] === "2"){
@@ -326,7 +332,8 @@ if (isset($_GET['sortField'])) {
                 echo '<td>'. $result['pref_name']. $result['address']. '</td>';
                 echo '<td>'. $result['created_at'].'</td>';
                 $memberEditPage = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member_edit.php?id=' . $result['id'] ;
-                echo '<td><a href=' , $memberEditPage ,'>編集</a>';
+                echo '<td><a style="color: blue;" href=' , $memberEditPage ,'>編集</a></td>';
+                echo '<td><a style="color: blue;" href=' , $memberDetailPage ,'>詳細</a></td>';
                 echo '</tr>';
             }
         
