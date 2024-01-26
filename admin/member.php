@@ -82,8 +82,13 @@ if (isset($_GET['sortField'])) {
         </nav>
 </header>
 
+<!----------------------------------------　メイン　会員登録ボタン　------------------------------------------>
+<div class = "main" style=" margin-top: 30px;">
+    <div class = "btn"><a href='https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member_regist.php'>会員登録</a></div>
+</div>
+
 <!----------------------------------------　メイン　検索フォーム　------------------------------------------>
-<div class = "main" style=" margin-top: 50px; ">
+<div class = "main" style=" margin-top: 20px; ">
     <form action="https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php" method="post">
     <table border="1" width="500" style="border-collapse: collapse; margin: auto;" class="search">
         <tr>
@@ -164,7 +169,7 @@ if (isset($_GET['sortField'])) {
 
 ?>
 
-<div class = "main" style=" margin-top: 50px; ">
+<div class = "main" style=" margin-top: 30px; ">
     <table border="1"  width="700" style="border-collapse: collapse; margin: auto;" class="resultSearch">
         <tr>
             <th>ID<a href="?sortField=id">
@@ -190,6 +195,7 @@ if (isset($_GET['sortField'])) {
                     echo '▼';
                 }?></a>
             </th>
+            <th>編集</th>
         </tr>
 
             <?php
@@ -319,6 +325,8 @@ if (isset($_GET['sortField'])) {
                 echo '<td>'. $gender.'</td>';
                 echo '<td>'. $result['pref_name']. $result['address']. '</td>';
                 echo '<td>'. $result['created_at'].'</td>';
+                $memberEditPage = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member_edit.php?id=' . $result['id'] ;
+                echo '<td><a href=' , $memberEditPage ,'>編集</a>';
                 echo '</tr>';
             }
         
@@ -335,19 +343,30 @@ if (isset($_GET['sortField'])) {
         $memberPrevPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage -1;
         echo '<div style="display: table-cell; text-align: left;"> <a href=', $memberPrevPageLink ,'>＜ 前へ</a></div>';
     }elseif($currentPage == 1){
-        echo '<p style="display: table-cell; text-align: left; color:gray;">　 　　</p>';
+        echo '<p style="display: table-cell; text-align: left; ">　 　　</p>';
     };
 
     //ページめくり　3ページ分
+    $memberPrev2PageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage -2;
     $memberPrevPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage -1;
     $memberNextPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +1;
+    $memberNext2PageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +2;
 
+    if($currentPage == $totalPages){
+    echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberPrev2PageLink ,'>'. $currentPage -2 . '</a></div>';
+    }
     if($currentPage > 1){
     echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberPrevPageLink ,'>'. $currentPage -1 . '</a></div>';
     }
+
     echo '<p style="display: table-cell; text-align: center; background-color: darkgray; border: 1px solid #000;">'. $currentPage .'</p>';
+    
     if($currentPage < $totalPages){
     echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberNextPageLink ,'>'. $currentPage +1 . '</a></div>';
+    }
+
+    if($currentPage == 1){
+    echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberNext2PageLink ,'>'. $currentPage +2 . '</a></div>';
     }
 
     //次へ
@@ -355,7 +374,7 @@ if (isset($_GET['sortField'])) {
         $memberNextPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +1;
         echo '<div style="display: table-cell; text-align: right;"><a href=', $memberNextPageLink, '>次へ ＞</a></div>';
     }elseif($currentPage > $totalPages || $currentPage == $totalPages){
-        echo '<p style="display: table-cell; text-align: right; color:gray;">　 　　</p>';
+        echo '<p style="display: table-cell; text-align: right; ">　 　　</p>';
     }
     ?>
 
