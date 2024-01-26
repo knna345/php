@@ -201,7 +201,7 @@ if (isset($_GET['sortField'])) {
 
             <?php
             //-----------------------------------------------
-            //データベース接続、メンバー情報取得、メンバー情報総数取得
+            //データベース接続 ｜ メンバー情報取得、メンバー情報総数取得
             $sql = 'SELECT * FROM members WHERE 1 = 1';
             $sqlCount = 'SELECT count(*) AS total FROM members WHERE 1 = 1';
 
@@ -233,6 +233,7 @@ if (isset($_GET['sortField'])) {
             }
             //delete
             $sql .= " AND deleted_at is NULL";
+            $sqlCount .= " AND deleted_at is NULL";
             //sort
             $sql .= " ORDER BY $sortField $sortOrder";
             
@@ -267,8 +268,6 @@ if (isset($_GET['sortField'])) {
                 $stmt->bindValue(':freeword', '%'.$search['freeword'].'%', PDO::PARAM_STR);
             }
 
-            //delete
-            $sql .= " AND deleted_at is NULL";
 
             //offset---これはいつでもいる
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -359,7 +358,7 @@ if (isset($_GET['sortField'])) {
     $memberNextPageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +1;
     $memberNext2PageLink = 'https://ik1-219-79869.vs.sakura.ne.jp/php/admin/member.php?page=' . $currentPage +2;
 
-    if($currentPage == $totalPages){
+    if(($currentPage == $totalPages) AND $currentPage !== 1){
     echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberPrev2PageLink ,'>'. $currentPage -2 . '</a></div>';
     }
     if($currentPage > 1){
@@ -372,7 +371,7 @@ if (isset($_GET['sortField'])) {
     echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberNextPageLink ,'>'. $currentPage +1 . '</a></div>';
     }
 
-    if($currentPage == 1){
+    if($currentPage == 1 AND $currentPage < $totalPages ){
     echo '<div style="display: table-cell; text-align: center; border: 1px solid #000;"><a href=', $memberNext2PageLink ,'>'. $currentPage +2 . '</a></div>';
     }
 

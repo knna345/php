@@ -186,7 +186,7 @@ foreach ($sql as $row) {
 </tr>
 <tr>
   <td>パスワード</td>
-  <td><input type="password" name="password" value="<?php echo isset($original['password']) ? $original['password'] : null;?>"></td>
+  <td><input type="password" name="password" value=""></td>
 </tr>
 <tr>
   <td ></td>
@@ -202,7 +202,7 @@ foreach ($sql as $row) {
 </tr>
 <tr>
   <td>パスワード確認</td>
-  <td><input type="password" name="passwordConfirm" value="<?php echo isset($original['passwordConfirm']) ? $original['passwordConfirm'] : null;?>"></td>
+  <td><input type="password" name="passwordConfirm" value=""></td>
 </tr>
 <tr>
   <td ></td>
